@@ -1,6 +1,6 @@
 #!/bin/bash
 
-python ./faster_rcnn/train_net.py \
+python ./faster_rcnn/test_net.py \
 --gpu 0 \
 --weights ./data/pretrain_model/VGG_imagenet.npy \
 --imdb kittivoc_train \

@@ -38,14 +38,17 @@ class kittivoc(imdb):
                             else devkit_path
         self._data_path = self._devkit_path
         self._classes = ('__background__', # always index 0
-                         'pedestrian', 'car', 'cyclist')
+                         'blue_ball', 'brown_ball', 'pink_pig', 'gree_ball', 'bsk_ball', 'football', 'pokemon_ball', 
+'bone', 'soccer', 'red_ball', 'bear', 'red_pig', 'dontcare')
         self._class_to_ind = dict(zip(self.classes, xrange(self.num_classes)))
         self._image_ext = '.jpg'
         self._image_index = self._load_image_set_index()
+        print('image index: ', self._image_index)
         self._remove_empty_samples()
         # Default to roidb handler
         #self._roidb_handler = self.selective_search_roidb
         self._roidb_handler = self.gt_roidb
+        print('roidb handler: ',self._roidb_handler)
         self._salt = str(uuid.uuid4())
         self._comp_id = 'comp4'
         self._year = ''

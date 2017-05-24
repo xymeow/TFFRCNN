@@ -8,6 +8,7 @@ import glob
 
 this_dir = osp.dirname(__file__)
 print(this_dir)
+sys.path.insert(0, this_dir + '/..')
 
 from lib.networks.factory import get_network
 from lib.fast_rcnn.config import cfg
@@ -16,12 +17,9 @@ from lib.fast_rcnn.nms_wrapper import nms
 from lib.utils.timer import Timer
 
 CLASSES = ('__background__',
-           'aeroplane', 'bicycle', 'bird', 'boat',
-           'bottle', 'bus', 'car', 'cat', 'chair',
-           'cow', 'diningtable', 'dog', 'horse',
-           'motorbike', 'person', 'pottedplant',
-           'sheep', 'sofa', 'train', 'tvmonitor')
-
+            'blue_ball', 'brown_ball', 'pink_pig', 'gree_ball', 'bsk_ball', 'football', 'pokemon_ball', 
+'bone', 'soccer', 'red_ball', 'bear', 'red_pig')
+#
 
 # CLASSES = ('__background__','person','bike','motorbike','car','bus')
 
@@ -30,19 +28,20 @@ def vis_detections(im, class_name, dets, ax, thresh=0.5):
     inds = np.where(dets[:, -1] >= thresh)[0]
     if len(inds) == 0:
         return
-
+    
     for i in inds:
         bbox = dets[i, :4]
         score = dets[i, -1]
 
         ax.add_patch(
-            plt.Rectangle((bbox[0], bbox[1]),
-                          bbox[2] - bbox[0],
-                          bbox[3] - bbox[1], fill=False,
-                          edgecolor='red', linewidth=3.5)
+            plt.Rectangle(((bbox[0]+bbox[2])/2, (bbox[1]+bbox[3])/2),
+                          1,
+                          1, fill=False,
+                          edgecolor='red', linewidth=5)
         )
-        ax.text(bbox[0], bbox[1] - 2,
-                '{:s} {:.3f}'.format(class_name, score),
+        print(bbox)
+        ax.text((bbox[0]+bbox[2])/2, (bbox[1]+bbox[3])/2 - 5,
+                '{:s}' .format(class_name),
                 bbox=dict(facecolor='blue', alpha=0.5),
                 fontsize=14, color='white')
 
@@ -52,8 +51,9 @@ def vis_detections(im, class_name, dets, ax, thresh=0.5):
                  fontsize=14)
     plt.axis('off')
     plt.tight_layout()
-    plt.draw()
-
+#    plt.draw()
+    plt.savefig('img.jpg')
+    return len(inds)
 
 def demo(sess, net, image_name):
     """Detect object classes in an image using pre-computed object proposals."""
@@ -74,9 +74,10 @@ def demo(sess, net, image_name):
     fig, ax = plt.subplots(figsize=(12, 12))
     ax.imshow(im, aspect='equal')
 
-    CONF_THRESH = 0.8
-    NMS_THRESH = 0.3
-    for cls_ind, cls in enumerate(CLASSES[1:]):
+    CONF_THRESH = 0.01
+    NMS_THRESH = 0.1
+    objs = 0
+    for cls_ind, cls in enumerate(CLASSES[1:-1]):
         cls_ind += 1  # because we skipped background
         cls_boxes = boxes[:, 4 * cls_ind:4 * (cls_ind + 1)]
         cls_scores = scores[:, cls_ind]
@@ -84,8 +85,8 @@ def demo(sess, net, image_name):
                           cls_scores[:, np.newaxis])).astype(np.float32)
         keep = nms(dets, NMS_THRESH)
         dets = dets[keep, :]
-        vis_detections(im, cls, dets, ax, thresh=CONF_THRESH)
-
+        objs += vis_detections(im, cls, dets, ax, thresh=CONF_THRESH)
+    print('recognized objects:  ', objs)
 
 def parse_args():
     """Parse input arguments."""
@@ -121,11 +122,12 @@ if __name__ == '__main__':
     # load model
     print ('Loading network {:s}... '.format(args.demo_net)),
     saver = tf.train.Saver()
-    saver.restore(sess, args.model)
+    ckpt = tf.train.latest_checkpoint(args.model)
+    saver.restore(sess, ckpt)
     print (' done.')
 
     # Warmup on a dummy image
-    im = 128 * np.ones((300, 300, 3), dtype=np.uint8)
+    im = 128 * np.ones((500, 500, 3), dtype=np.uint8)
     for i in xrange(2):
         _, _ = im_detect(sess, net, im)
 

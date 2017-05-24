@@ -7,8 +7,9 @@ import xml.etree.ElementTree as ET
 import shutil
 import numpy as np
 
-def generate_xml(name, lines, img_size = (370, 1224, 3), \
-                 class_sets = ('pedestrian', 'car', 'cyclist'), \
+def generate_xml(name, lines, img_size = (500, 500, 3), \
+                 class_sets = ('blue_ball', 'brown_ball', 'pink_pig', 'gree_ball', 'bsk_ball', 'football', 'pokemon_ball', 
+'bone', 'soccer', 'red_ball', 'bear', 'red_pig'), \
                  doncateothers = True):
     """
     Write annotations into voc xml format.
@@ -81,13 +82,13 @@ def generate_xml(name, lines, img_size = (370, 1224, 3), \
             continue
         cls = 'dontcare' if cls not in class_sets else cls
         obj = append_xml_node_attr('object', parent=annotation)
-        occlusion = int(float(splitted_line[2]))
-        x1, y1, x2, y2 = int(float(splitted_line[4]) + 1), int(float(splitted_line[5]) + 1), \
-                         int(float(splitted_line[6]) + 1), int(float(splitted_line[7]) + 1)
-        truncation = float(splitted_line[1])
-        difficult = 1 if _is_hard(cls, truncation, occlusion, x1, y1, x2, y2) else 0
+        occlusion = 0#int(float(splitted_line[2]))
+        x1, y1, x2, y2 = int(float(splitted_line[1]) + 1), int(float(splitted_line[2]) + 1), \
+                         int(float(splitted_line[3]) + 1), int(float(splitted_line[4]) + 1)
+        truncation = 0.00
+   #     difficult = 1 if _is_hard(cls, truncation, occlusion, x1, y1, x2, y2) else 0
         truncted = 0 if truncation < 0.5 else 1
-
+        difficult = 0
         append_xml_node_attr('name', parent=obj, text=cls)
         append_xml_node_attr('pose', parent=obj, text='Left')
         append_xml_node_attr('truncated', parent=obj, text=str(truncted))
@@ -210,12 +211,13 @@ if __name__ == '__main__':
     # for kitti only provides training labels
     for dset in ['train']:
 
-        _labeldir = os.path.join(_kittidir, 'training', 'label_2')
-        _imagedir = os.path.join(_kittidir, 'training', 'image_2')
+        _labeldir = os.path.join(_kittidir, 'testing', 'label')
+        _imagedir = os.path.join(_kittidir, 'testing', 'image')
         """
         class_sets = ('pedestrian', 'cyclist', 'car', 'person_sitting', 'van', 'truck', 'tram', 'misc', 'dontcare')
         """
-        class_sets = ('pedestrian', 'cyclist', 'car', 'dontcare')
+        class_sets = ('blue_ball', 'brown_ball', 'pink_pig', 'gree_ball', 'bsk_ball', 'football', 'pokemon_ball', 
+'bone', 'soccer', 'red_ball', 'bear', 'red_pig')
         class_sets_dict = dict((k, i) for i, k in enumerate(class_sets))
         allclasses = {}
         fs = [open(os.path.join(_dest_set_dir, cls + '_' + dset + '.txt'), 'w') for cls in class_sets ]
@@ -228,7 +230,7 @@ if __name__ == '__main__':
             stem, ext = os.path.splitext(basename)
             with open(file, 'r') as f:
                 lines = f.readlines()
-            img_file = os.path.join(_imagedir, stem + '.png')
+            img_file = os.path.join(_imagedir, stem + '.jpg')
             img = cv2.imread(img_file)
             img_size = img.shape
 
@@ -259,8 +261,8 @@ if __name__ == '__main__':
                 if cls not in cls_in_image:
                     fs[class_sets_dict[cls]].writelines(stem + ' -1\n')
 
-            if int(stem) % 100 == 0:
-                print(file)
+            #if int(stem) % 100 == 0:
+            print(file)
 
         (f.close() for f in fs)
         ftrain.close()

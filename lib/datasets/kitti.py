@@ -27,9 +27,10 @@ class kitti(imdb):
         self._kitti_path = self._get_default_path() if kitti_path is None \
                             else kitti_path
         self._data_path = os.path.join(self._kitti_path, 'data_object_image_2')
-        self._classes = ('__background__', 'Car', 'Pedestrian', 'Cyclist')
+        self._classes = ('__background__', 'blue_ball', 'brown_ball', 'pink_pig', 'gree_ball', 'bsk_ball', 'football', 'pokemon_ball', 
+'bone', 'soccer', 'red_ball', 'bear', 'red_pig')
         self._class_to_ind = dict(zip(self.classes, xrange(self.num_classes)))
-        self._image_ext = '.png'
+        self._image_ext = '.jpg'
         self._image_index = self._load_image_set_index_new()
         # Default to roidb handler
         if cfg.IS_RPN:
